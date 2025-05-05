@@ -61,7 +61,7 @@ coverage.xml
 .pylint.d/
 
 # data directory (user-specified)
-data/
+data/*.json
 
 # 기타 시스템 파일
 .DS_Store
