@@ -30,4 +30,4 @@ def get_bus_arrival_time(station_id: str, route_id: str, ord: str) -> str:
 route_id = '100100344'
 station_id = '107000061'
 ord = '29'
-print(get_bus_arrival_time(station_id, route_id, ord))
+#print(get_bus_arrival_time(station_id, route_id, ord))
