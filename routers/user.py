@@ -6,7 +6,7 @@ from services.user_service import user_service
 
 router = APIRouter()
 
-@router.post("/connect", response_model=UserIDResponse)
+@router.get("/connect", response_model=UserIDResponse)
 async def connect_user():
     user_id = user_service.generate_user_id()
     return {"user_id": user_id}
