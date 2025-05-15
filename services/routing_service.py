@@ -4,28 +4,17 @@ from schemas.schemas import UserSessionResponse
 from services.session import user_session
 
 class RoutingService:
-    def create_session(self, user_id: str, destination_node_id: int):
-        db = SessionLocal()
-        routing_info = db.query(Routing).filter(Routing.to_node_id == destination_node_id).all()
-
-        user_session[user_id] = {
-            "routing_info": routing_info,
-            "destination": destination_node_id,
-            "current_step_idx": 0
-        }
-        return UserSessionResponse(user_id=user_id, status="Session started.")
-    
-    def end_session(self, user_id:str):
-        user_session.pop(user_id, None)
-        return UserSessionResponse(user_id=user_id, status="Session ended.")
-    
     def store_user_itinerary(self, user_id:str, itinerary: dict):
         user_session[user_id]={
             "itinerary": itinerary,
             "current_leg_idx":0,
-            "current_step_idx":0,
+            "current_step_idx":0
         }
-
+        
+    def end_session(self, user_id:str):
+        user_session.pop(user_id, None)
+        return UserSessionResponse(user_id=user_id, status="Session ended.")
+    
     def initialize_navigation_by_type(self, user_id: str, current_node_id: int, destination_node_type: int):
         db = SessionLocal()
 
