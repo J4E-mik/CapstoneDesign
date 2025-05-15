@@ -14,11 +14,11 @@ async def connect_user():
 @router.post("/start_session", response_model = UserSessionResponse)
 async def start_user_session(
     user_id: str = Form(...),
-    destination_node_id: int = Form(...),
+    itinerary: dict = Form(...),
     routing_service: RoutingService = Depends()
 ):
-    session_info = routing_service.create_session(user_id, destination_node_id)
-    return session_info
+    routing_service.store_user_itinerary(user_id, itinerary)
+    return UserSessionResponse(user_id=user_id, status="Itinerary 저장 완료.")
 
 @router.post("/end_session", response_model=UserSessionResponse)
 async def end_user_session(

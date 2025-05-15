@@ -19,6 +19,13 @@ class RoutingService:
         user_session.pop(user_id, None)
         return UserSessionResponse(user_id=user_id, status="Session ended.")
     
+    def store_user_itinerary(self, user_id:str, itinerary: dict):
+        user_session[user_id]={
+            "itinerary": itinerary,
+            "current_leg_idx":0,
+            "current_step_idx":0,
+        }
+
     def initialize_navigation_by_type(self, user_id: str, current_node_id: int, destination_node_type: int):
         db = SessionLocal()
 

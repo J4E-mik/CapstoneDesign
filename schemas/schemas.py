@@ -8,6 +8,13 @@ class GPSUpdateResponse(BaseModel):
 class GPSTrackResponse(BaseModel):
     message: Optional[str] = None
     error: Optional[str] = None
+    bus_number: Optional[str] = None
+    stop_count: Optional[int] = None
+    boarding_stop: Optional[str] = None
+    alighting_stop: Optional[str] = None
+    line_number: Optional[str] = None
+    boarding_station: Optional[str] = None
+    alighting_station: Optional[str] = None
 
 class SpeechTranscriptionResponse(BaseModel):
     transcription: str
