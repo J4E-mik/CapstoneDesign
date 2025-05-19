@@ -1,7 +1,7 @@
 import requests, time, json
 from math import radians, sin, cos, sqrt, atan2
 
-SERVER_URL = "http://"
+SERVER_URL = "http://localhost:8000"
 USER_ID = None
 ITINERARY = None
 current_leg_idx = 0
@@ -95,12 +95,12 @@ def main():
                 end_lat, end_lon = map(float, end_coords)
                 
                 if is_arrived((current_lat, current_lon), (end_lat, end_lon)):
-                    print(f"[Step] Step {current_step_idx} 도착: {step['text']}")
+                    print(f"[Step] Step {current_step_idx} 도착: {step['description']}")
                     gps_update(current_lat, current_lon)
                     gps_track(current_lat, current_lon)
                     current_step_idx += 1
                 else:
-                    print(f"[Moving] Step {current_step_idx} 진행중: {step['text']}")
+                    print(f"[Moving] Step {current_step_idx} 진행중: {step['description']}")
                 
                 time.sleep(1)
 

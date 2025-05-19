@@ -3,7 +3,7 @@ from schemas.schemas import SpeechTranscriptionResponse
 
 class SpeechService:
     def __init__(self):
-        self.model = whisper.load_model("base")
+        self.model = whisper.load_model("small")
 
     async def transcribe_audio(self, audio_file) -> str:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp:

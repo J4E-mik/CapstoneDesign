@@ -71,3 +71,5 @@ Thumbs.db
 *.log
 *.env
 /.legacy
+data/*.mp3
+data/*.m4a

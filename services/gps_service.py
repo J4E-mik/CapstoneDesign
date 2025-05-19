@@ -44,9 +44,9 @@ class GPSService:
 
             if is_within_step(lat, lon, step_end_lat, step_end_lon):
                 session["current_step_idx"] += 1
-                return GPSTrackResponse(message=f"Reached step: {step['text']}")
+                return GPSTrackResponse(message=f"Reached step: {step['description']}")
             
-            return GPSTrackResponse(message=f"Proceeding to step: {step['text']}")
+            return GPSTrackResponse(message=f"Proceeding to step: {step['description']}")
         
         elif mode in ["BUS", "SUBWAY"]:
             pass_stations = current_leg["passStopList"]["stationList"]
