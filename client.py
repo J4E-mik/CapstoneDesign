@@ -34,8 +34,10 @@ def transcribe_audio(audio_file):
 
 def get_current_gps():
     # 임시 코딩 GPS 모듈 에서 데이터 가져오는 로직 구현
-    lat = 37.606
-    lon = 127.041
+
+    global lat, lon
+    #lat += 0.000025
+    #lon -= 0.00001
     return lat, lon
 
 def request_route(destination):
@@ -100,7 +102,9 @@ def main():
                     gps_track(current_lat, current_lon)
                     current_step_idx += 1
                 else:
-                    print(f"[Moving] Step {current_step_idx} 진행중: {step['description']}")
+                    gps_update(current_lat, current_lon)
+                    gps_track(current_lat, current_lon)
+                    print(f"[Moving] Step {current_step_idx} 진행중: {step['description']} 현재위치: lat:{lat} lon:{lon}")
                 
                 time.sleep(1)
 
@@ -117,6 +121,8 @@ def main():
                     gps_track(current_lat, current_lon)
                     break
                 else:
+                    gps_update(current_lat, current_lon)
+                    gps_track(current_lat, current_lon)
                     print(f"[Moving] {mode} 이용 중...")
                 time.sleep(5)
             

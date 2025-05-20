@@ -18,10 +18,12 @@ CapstoneDesign/
 │ ├── speech.py 
 │ └── user.py 
 ├── services/ (비즈니스 로직 및 외부 API 통신) 
-│ ├── gps_service.py 
-│ ├── speech_service.py 
-│ ├── navigation_service.py 
-│ └── routing_service.py 
+│ ├── gps_service.py
+│ ├── navigation_service.py
+│ ├── routing_service.py
+│ ├── session.py
+│ ├── speech_service.py
+│ └── user_service.py
 ├── schemas/ (Pydantic 데이터 모델 정의) 
 │ └── schemas.py 
 └── utils/ 
