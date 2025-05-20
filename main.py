@@ -15,7 +15,7 @@ def create_app():
     app.include_router(user.router, prefix="/user", tags=["User"])
 
     app.mount("/voices", StaticFiles(directory=settings.STATIC_VOICE_DIR), name="voices")
-
+    
     return app
 
 app = create_app()

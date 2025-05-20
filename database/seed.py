@@ -1,6 +1,10 @@
 import pandas as pd
-from database.connection import SessionLocal
-from database.models import Node, Edge
+from database.connection import SessionLocal, engine
+from database.models import Node, Edge, Base
+import math
+
+def safe_float(val):
+    return None if pd.isna(val) or (isinstance(val, float) and math.isnan(val)) else val
 
 def seed_data():
     db = SessionLocal()
@@ -21,10 +25,13 @@ def seed_data():
             weight=row.weight,
             node1=row.node1,
             node2=row.node2,
-            type=row.type,
-            heuristic=row.heuristic
+            direct=row.direct,
+            heuristic=safe_float(row.heuristic),
+            type=safe_float(row.type)
             ) for row in edge_df.itertuples(index=False)]
 
     db.bulk_save_objects(nodes + edges)
     db.commit()
     db.close()
+
+seed_data()

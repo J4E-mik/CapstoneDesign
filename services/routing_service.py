@@ -2,6 +2,15 @@ from database.connection import SessionLocal
 from database.models import Routing, Node
 from schemas.schemas import UserSessionResponse
 from services.session import user_session
+from services.feedback_service import FeedbackService
+
+feedback_service = FeedbackService()
+
+def user_passed_edge(edge_id, usage_time):
+    feedback_service.record_edge_usage(edge_id, usage_time)
+
+def periodic_feedback_update():
+    feedback_service.update_database_and_routing()
 
 class RoutingService:
     def store_user_itinerary(self, user_id:str, itinerary: dict):

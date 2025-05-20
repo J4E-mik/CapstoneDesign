@@ -9,34 +9,28 @@ def build_graph(db):
 
     for edge in edges:
         graph[edge.node1].append((edge.node2, edge.weight, edge.heuristic))
-        if edge.type == 1:
+        if edge.direct == 1:
             graph[edge.node2].append((edge.node1, edge.weight, edge.heuristic))
     return graph
-
-def heuristics(graph, node, goal):
-    for adj, _, h_value in graph[node]:
-        if adj == goal:
-            return h_value
-        return 0 # 휴리스틱 기본 값 0
     
 def a_star(graph, start, goal):
     open_set = [{0, start}]
     came_from = {}
-    g_score = {node: float('int') for node in graph}
+    g_score = {node: float('inf') for node in graph}
     g_score[start] = 0
 
     while open_set:
-        current_cost, current_node = heapq.heappop(open_set)
+        _, current_node = heapq.heappop(open_set)
 
         if current_node == goal:
             break
 
-        for neighbor, weight, _ in graph[current_node]:
+        for neighbor, weight, heuristic in graph[current_node]:
             tentative_g_score = g_score[current_node] + weight
             if tentative_g_score < g_score[neighbor]:
                 came_from[neighbor] = current_node
                 g_score[neighbor] = tentative_g_score
-                f_score = tentative_g_score + heuristics(graph, neighbor, goal)
+                f_score = tentative_g_score + (heuristic if heuristic is not None else 0)
                 heapq.heappush(open_set, (f_score, neighbor))
 
     return came_from, g_score

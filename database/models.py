@@ -19,8 +19,9 @@ class Edge(Base):
     weight = Column(Float, nullable=False)
     node1 = Column(Integer, ForeignKey('nodes.id', ondelete='CASCADE'), nullable=False)
     node2 = Column(Integer, ForeignKey('nodes.id', ondelete='CASCADE'), nullable=False)
-    type = Column(Integer, nullable=False, default=1)
+    direct = Column(Integer, nullable=False, default=1)
     heuristic = Column(Float, nullable=True)
+    type = Column(Integer, nullable=True)
 
     start_node = relationship("Node", foreign_keys=[node1])
     end_node = relationship("Node", foreign_keys=[node2])
