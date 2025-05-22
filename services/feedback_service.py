@@ -1,4 +1,4 @@
-from database.heuristic import update_heuristic
+from database.heuristic import update_heuristics
 from database.routing import generate_routing_table
 
 class FeedbackService:
@@ -9,6 +9,6 @@ class FeedbackService:
         self.edge_usage_data.setdefault(edge_id, []).append(usage_time)
     
     def update_database_and_routing(self):
-        update_heuristic(self.edge_usage_data)
+        update_heuristics(self.edge_usage_data)
         generate_routing_table()
         self.edge_usage_data.clear()
