@@ -1,3 +1,5 @@
+# 미사용
+
 import heapq
 from collections import defaultdict
 from database.connection import SessionLocal
@@ -8,9 +10,8 @@ def build_graph(db):
     graph = defaultdict(list)
 
     for edge in edges:
-        graph[edge.node1].append((edge.node2, edge.weight, edge.heuristic))
-        if edge.direct == 1:
-            graph[edge.node2].append((edge.node1, edge.weight, edge.heuristic))
+        graph[edge.start].append((edge.end, edge.weight, edge.heuristic))
+
     return graph
     
 def a_star(graph, start, goal):
@@ -35,6 +36,9 @@ def a_star(graph, start, goal):
 
     return came_from, g_score
 
+
+
+'''
 def reconstruct_next_node(came_from, start, goal):
     if goal not in came_from:
         return None
@@ -60,10 +64,11 @@ def generate_routing_table():
             next_node = reconstruct_next_node(came_from, from_node.id, to_id)
             if next_node and g_score[to_id] != float('inf'):
                 routing = Routing(
-                    from_node_id=from_node.id,
-                    to_node_id=to_id,
-                    to_node_type=to_type,
-                    next_node_id=next_node,
+                    prev_node=prev_node,
+                    current_node=from_node.id,
+                    next_node=next_node,
+                    goal=to_id,
+                    direct=direct,
                     total_cost=g_score[to_id]
                 )
                 db.merge(routing)
@@ -90,3 +95,4 @@ def dijkstra(graph, start_node):
                 prev[adj] = node
                 heapq.heappush(queue, (alt, adj))
     return dist, prev
+'''

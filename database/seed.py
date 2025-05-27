@@ -16,16 +16,17 @@ def seed_data():
         Node(
             id=row.id,
             type=row.type,
-            floor=row.floor
+            floor=row.floor,
+            x=row.x,
+            y=row.y
             ) for row in node_df.itertuples(index=False)]
     
     edges = [
         Edge(
             id=row.id,
             weight=row.weight,
-            node1=row.node1,
-            node2=row.node2,
-            direct=row.direct,
+            start=row.start,
+            end=row.end,
             heuristic=safe_float(row.heuristic),
             type=safe_float(row.type)
             ) for row in edge_df.itertuples(index=False)]

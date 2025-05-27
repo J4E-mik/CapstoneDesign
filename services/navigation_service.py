@@ -44,7 +44,7 @@ class NavigationService:
         if not route:
             return {"error": "Route Not Found."}
         
-        itinerary = route["metaData"]["plan"]["itineraries"][1]
+        itinerary = route["metaData"]["plan"]["itineraries"][0]
 
         return RouteResponse(
             destination = destination,

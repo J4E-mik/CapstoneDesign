@@ -1,5 +1,4 @@
 from database.heuristic import update_heuristics
-from database.routing import generate_routing_table
 
 class FeedbackService:
     def __init__(self):
@@ -10,5 +9,4 @@ class FeedbackService:
     
     def update_database_and_routing(self):
         update_heuristics(self.edge_usage_data)
-        generate_routing_table()
         self.edge_usage_data.clear()

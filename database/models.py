@@ -10,23 +10,39 @@ class Node(Base):
     id = Column(Integer, primary_key=True)
     type = Column(Integer, nullable=False)
     floor = Column(Integer, nullable=False)
+    x = Column(Integer, nullable=False)
+    y = Column(Integer, nullable=False)
 
 
 class Edge(Base):
     __tablename__ = 'edges'
 
     id = Column(Integer, primary_key=True, autoincrement=False)
-    weight = Column(Float, nullable=False)
-    node1 = Column(Integer, ForeignKey('nodes.id', ondelete='CASCADE'), nullable=False)
-    node2 = Column(Integer, ForeignKey('nodes.id', ondelete='CASCADE'), nullable=False)
-    direct = Column(Integer, nullable=False, default=1)
+    weight = Column(Integer, nullable=False)
+    start = Column(Integer, ForeignKey('nodes.id', ondelete='CASCADE'), nullable=False)
+    end = Column(Integer, ForeignKey('nodes.id', ondelete='CASCADE'), nullable=False)
     heuristic = Column(Float, nullable=True)
     type = Column(Integer, nullable=True)
 
-    start_node = relationship("Node", foreign_keys=[node1])
-    end_node = relationship("Node", foreign_keys=[node2])
+    start_node = relationship("Node", foreign_keys=[start])
+    end_node = relationship("Node", foreign_keys=[end])
 
+class Routing(Base):
+    __tablename__ = 'routing'
 
+    prev_node = Column(Integer, ForeignKey('nodes.id', ondelete='CASCADE'), nullable=True)
+    current_node = Column(Integer, ForeignKey('nodes.id', ondelete='CASCADE'), primary_key=True)
+    next_node = Column(Integer, ForeignKey('nodes.id', ondelete='CASCADE'), nullable=True)
+    goal = Column(Integer, ForeignKey('nodes.id', ondelete='CASCADE'), primary_key=True)
+    direct = Column(Integer, nullable=False)
+    total_cost = Column(Float, nullable=False)
+
+    prev_node_rel = relationship('Node', foreign_keys=[prev_node])
+    current_node_rel = relationship('Node', foreign_keys=[current_node])
+    next_node_rel = relationship('Node', foreign_keys=[next_node])
+    goal_rel = relationship('Node', foreign_keys=[goal])
+
+'''
 class Routing(Base):
     __tablename__ = 'routing'
 
@@ -39,3 +55,4 @@ class Routing(Base):
     from_node = relationship('Node', foreign_keys=[from_node_id])
     to_node = relationship('Node', foreign_keys=[to_node_id])
     next_node = relationship('Node', foreign_keys=[next_node_id])
+'''

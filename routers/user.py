@@ -11,15 +11,6 @@ async def connect_user():
     user_id = user_service.generate_user_id()
     return {"user_id": user_id}
 
-@router.post("/start_session", response_model = UserSessionResponse)
-async def start_user_session(
-    user_id: str = Form(...),
-    itinerary: dict = Form(...),
-    routing_service: RoutingService = Depends()
-):
-    routing_service.store_user_itinerary(user_id, itinerary)
-    return UserSessionResponse(user_id=user_id, status="Itinerary 저장 완료.")
-
 @router.post("/end_session", response_model=UserSessionResponse)
 async def end_user_session(
     user_id: str = Form(...),
@@ -28,23 +19,24 @@ async def end_user_session(
     session_info = routing_service.end_session(user_id)
     return session_info
 
-@router.post("/start_navigation", response_model = UserSessionResponse)
-async def start_navigation(
+@router.post("/subway_navigation")
+async def subway_navigation(
     user_id: str = Form(...),
-    current_node_id: int = Form(...),
-    destination_node_type: int = Form(...),
+    start_node_id: int = Form(...),
+    goal_node_id: int =Form(...),
     routing_service: RoutingService = Depends()
 ):
-    session_info = routing_service.initialize_navigation_by_type(
-        user_id, current_node_id, destination_node_type
-    )
-    return session_info
+    route_response = routing_service.initialize_subway_navigation(user_id, start_node_id, goal_node_id)
+    return route_response
 
-@router.post("/update_position", response_model=UserSessionResponse)
-async def update_position(
+
+'''
+@router.post("/start_session", response_model = UserSessionResponse)
+async def start_user_session(
     user_id: str = Form(...),
-    current_node_id: int = Form(...),
+    itinerary: dict = Form(...),
     routing_service: RoutingService = Depends()
 ):
-    next_node_info = routing_service.get_next_node(user_id, current_node_id)
-    return next_node_info
+    routing_service.store_user_itinerary(user_id, itinerary)
+    return UserSessionResponse(user_id=user_id, status="Itinerary 저장 완료.")
+'''
