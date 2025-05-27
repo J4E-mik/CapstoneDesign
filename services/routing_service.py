@@ -2,27 +2,11 @@ from database.connection import SessionLocal
 from database.models import Node, Edge
 from schemas.schemas import UserSessionResponse
 from services.session import user_session
-from services.feedback_service import FeedbackService
 from collections import defaultdict
 import numpy as np
 import heapq
 
-feedback_service = FeedbackService()
-
-def user_passed_edge(edge_id, usage_time):
-    feedback_service.record_edge_usage(edge_id, usage_time)
-
-def periodic_feedback_update():
-    feedback_service.update_database_and_routing()
-
 class RoutingService:
-    def store_user_itinerary(self, user_id:str, itinerary: dict):
-        user_session[user_id]={
-            "itinerary": itinerary,
-            "current_leg_idx":0,
-            "current_step_idx":0
-        }
-        
     def end_session(self, user_id:str):
         user_session.pop(user_id, None)
         return UserSessionResponse(user_id=user_id, status="Session ended.")
@@ -51,7 +35,7 @@ class RoutingService:
         path = self.reconstruct_path(came_from, start_node_id, goal_node_id)
         route_response = self.build_json_response(path, node_coords)
 
-        user_session[user_id] = {"current_path": path}
+        user_session[user_id] = {"current_subway_path": path}
         db.close()
         return route_response
     
@@ -76,7 +60,7 @@ class RoutingService:
                     f_score = tentative_g_score + heuristic
                     heapq.heappush(open_set, (f_score, neighbor))
                 
-            return came_from, g_score
+        return came_from, g_score
         
     def reconstruct_path(self, came_from, start, goal):
         current = goal

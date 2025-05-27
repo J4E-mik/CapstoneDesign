@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Form
 from schemas.schemas import UserSessionResponse, UserIDResponse
 from services.routing_service import RoutingService
 from services.user_service import user_service
-
+from services.feedback_service import feedback_service
 
 router = APIRouter()
 
@@ -16,6 +16,7 @@ async def end_user_session(
     user_id: str = Form(...),
     routing_service: RoutingService = Depends()
 ):
+    feedback_service.update_database()
     session_info = routing_service.end_session(user_id)
     return session_info
 

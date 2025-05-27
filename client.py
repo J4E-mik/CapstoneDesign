@@ -1,11 +1,35 @@
-import requests, time, json
+import requests, time, json, threading, rclpy
 from math import radians, sin, cos, sqrt, atan2
+from rclpy.node import Node
+from sensor_msgs.msg import NavSatFix
 
-SERVER_URL = "http://localhost:8000"
+SERVER_URL = "http://172.16.111.90:8000"
 USER_ID = None
 ITINERARY = None
 current_leg_idx = 0
 current_step_idx = 0
+current_gps_data = {'latitude': None, 'longitude': None, 'status': -1}
+gps_node = None
+
+#add gps code
+class GPSSubscriber(Node):
+    def __init__(self):
+        super().__init__('gps_subscriber')
+        self.subscription = self.create_subscription(NavSatFix, '/fix', self.gps_callback, 10)
+        
+    def gps_callback(self, msg):
+        global current_gps_data
+        current_gps_data['latitude'] = msg.latitude
+        current_gps_data['longitude'] = msg.longitude
+        current_gps_data['status'] = msg.status.status
+
+def init_gps():
+    global gps_node
+    rclpy.init()
+    gps_node = GPSSubscriber()
+    ros_thread = threading.Thread(target=lambda: rclpy.spin(gps_node), daemon=True)
+    ros_thread.start()
+    print("[GPS] ROS2 GPS 구독 시작")
 
 def connect_server():
     global USER_ID
@@ -20,7 +44,7 @@ def haversine(lat1, lon1, lat2, lon2):
     a = sin(dlat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon/2)**2
     return R * 2 * atan2(sqrt(a), sqrt(1-a))
 
-def is_arrived(current, target, radius=5.0):
+def is_arrived(current, target, radius=3.0):
     distance = haversine(current[0], current[1], target[0], target[1])
     return distance <= radius
 
@@ -33,12 +57,21 @@ def transcribe_audio(audio_file):
     return transcription
 
 def get_current_gps():
-    # 임시 코딩 GPS 모듈 에서 데이터 가져오는 로직 구현
-
-    global lat, lon
-    #lat += 0.000025
-    #lon -= 0.00001
-    return lat, lon
+    global current_gps_data
+    
+    if gps_node is None:
+        init_gps()
+        time.sleep(2)
+    
+    if (current_gps_data['latitude'] is not None and 
+        current_gps_data['status'] == 0):
+        lat = current_gps_data['latitude']
+        lon = current_gps_data['longitude']
+        return lat, lon
+    else:
+        # GPS 신호 없을 때 기본값
+        print("[Error] No GPS signal.")
+        return None, None
 
 def request_route(destination):
     lat, lon = get_current_gps()
@@ -67,6 +100,11 @@ def gps_track(lat, lon):
     response = requests.post(f"{SERVER_URL}/gps/track", data=data)
     print(f"[DEBUG]: Tracking Response: {response.json()['message']}")
 
+def end_session():
+    data = {"user_id":USER_ID}
+    response = requests.post(f"{SERVER_URL}/user/end_session", data=data)
+    print(f"Server Response:{response.json()['status']}")
+
 def main():
     global ITINERARY, current_leg_idx, current_step_idx
     connect_server()
@@ -89,25 +127,39 @@ def main():
         print(f"[Leg] Mode: {mode}, Leg idx: {current_leg_idx}")
 
         if mode == "WALK":
-            steps = leg["steps"]
-            while current_step_idx < len(steps):
-                current_lat, current_lon = get_current_gps()
-                step = steps[current_step_idx]
-                end_coords = step["linestring"].split()[-1].split(",")
-                end_lat, end_lon = map(float, end_coords)
-                
-                if is_arrived((current_lat, current_lon), (end_lat, end_lon)):
-                    print(f"[Step] Step {current_step_idx} 도착: {step['description']}")
-                    gps_update(current_lat, current_lon)
-                    gps_track(current_lat, current_lon)
-                    current_step_idx += 1
-                else:
-                    gps_update(current_lat, current_lon)
-                    gps_track(current_lat, current_lon)
-                    print(f"[Moving] Step {current_step_idx} 진행중: {step['description']} 현재위치: lat:{lat} lon:{lon}")
-                
-                time.sleep(1)
-
+            steps = leg.get("steps")
+            if steps:
+                while current_step_idx < len(steps):
+                    current_lat, current_lon = get_current_gps()
+                    step = steps[current_step_idx]
+                    end_coords = step["linestring"].split()[-1].split(",")
+                    end_lat, end_lon = map(float, end_coords)
+                    
+                    if is_arrived((current_lat, current_lon), (end_lat, end_lon)):
+                        print(f"[Step] Step {current_step_idx} 도착: {step['description']}")
+                        gps_update(current_lat, current_lon)
+                        gps_track(current_lat, current_lon)
+                        current_step_idx += 1
+                    else:
+                        gps_update(current_lat, current_lon)
+                        gps_track(current_lat, current_lon)
+                        print(f"[Moving] Step {current_step_idx} 진행중: {step['description']} 현재위치: lat:{current_lat} lon:{current_lon}")
+                    
+                    time.sleep(1)
+            else:
+                end_point = leg["end"]
+                while True:
+                    current_lat, current_lon =get_current_gps()
+                    if is_arrived((current_lat, current_lon), end_point["lat"], end_point["lon"]):
+                        print(f"[Leg] WALK 종료 지점 도착")
+                        gps_update(current_lat, current_lon)
+                        gps_track(current_lat, current_lon)
+                        break
+                    else:
+                        gps_update(current_lat, current_lon)
+                        gps_track(current_lat, current_lon)
+                        print(f"[Moving] WALK 진행중... 현재위치: lat:{current_lat}, lon:{current_lon}")
+                        break
             current_step_idx = 0
             current_leg_idx += 1
         
@@ -129,6 +181,8 @@ def main():
             current_leg_idx += 1
 
     print("[Navigation] 목적지에 도착했습니다.")
+
+    end_session()
 
 if __name__ == '__main__':
     main()

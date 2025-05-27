@@ -1,5 +1,6 @@
 from config import settings
 from schemas.schemas import RouteResponse
+from services.session import user_session
 import requests
 
 class NavigationService:
@@ -44,7 +45,7 @@ class NavigationService:
         if not route:
             return {"error": "Route Not Found."}
         
-        itinerary = route["metaData"]["plan"]["itineraries"][0]
+        itinerary = route["metaData"]["plan"]["itineraries"][1]
 
         return RouteResponse(
             destination = destination,
@@ -52,3 +53,10 @@ class NavigationService:
             end = {"lat":dest_coords[1], "lon":dest_coords[0]},
             itinerary=itinerary
         )
+    
+    def store_user_itinerary(self, user_id:str, itinerary: dict):
+        user_session[user_id]={
+            "itinerary": itinerary,
+            "current_leg_idx":0,
+            "current_step_idx":0
+        }

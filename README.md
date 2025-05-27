@@ -11,7 +11,6 @@ CapstoneDesign/ \
 │ ├── connection.py \
 │ ├── heuristic.py \
 │ ├── models.py \
-│ ├── routing.py \
 │ └── seed.py \
 ├── routers/ (엔드포인트 라우터 정의) \
 │ ├── gps.py \

@@ -1,6 +1,6 @@
 from schemas.schemas import GPSUpdateResponse, GPSTrackResponse
 from services.session import user_locations, user_session
-from utils.gps_tracker import is_within_radius, is_within_step
+from utils.gps_tracker import is_within_radius
 
 class GPSService:
     def update_user_location(self, user_id: str, lat: float, lon: float):
@@ -30,24 +30,32 @@ class GPSService:
             return GPSTrackResponse(message=f"{mode} 완료, 다음 모드로 진행 필요")
 
         if mode == "WALK":
-            steps = current_leg["steps"]
-            step_idx = session.get("current_step_idx", 0)
+            steps = current_leg.get("steps")
 
-            if step_idx >= len(steps):
-                session["current_leg_idx"] += 1
-                session["current_step_idx"] = 0
-                return GPSTrackResponse(message="Walk segment complete. proceed to next.")
-            
-            step = steps[step_idx]
-            linestring = step["linestring"].split()
-            step_end_lon, step_end_lat = map(float, linestring[-1].split(','))
+            if steps:
+                step_idx = session.get("current_step_idx", 0)
+                if step_idx >= len(steps):
+                    session["current_leg_idx"] += 1
+                    session["current_step_idx"] = 0
+                    return GPSTrackResponse(message="Walk segment complete. proceed to next.")
 
-            if is_within_step(lat, lon, step_end_lat, step_end_lon):
-                session["current_step_idx"] += 1
-                return GPSTrackResponse(message=f"Reached step: {step['description']}")
             
-            return GPSTrackResponse(message=f"Proceeding to step: {step['description']}")
-        
+            
+                step = steps[step_idx]
+                linestring = step["linestring"].split()
+                step_end_lon, step_end_lat = map(float, linestring[-1].split(','))
+
+                if is_within_radius((lat, lon), (step_end_lat, step_end_lon)):
+                    session["current_step_idx"] += 1
+                    return GPSTrackResponse(message=f"Reached step: {step['description']}")
+                
+                return GPSTrackResponse(message=f"Proceeding to step: {step['description']}")
+            else:
+                if is_within_radius((lat,lon),(end_point["lat"], end_point["lon"])):
+                    session["current_leg_idx"] += 1
+                    return GPSTrackResponse(message="Walk segment complete")
+                return GPSTrackResponse(message="Walking...")
+            
         elif mode in ["BUS", "SUBWAY"]:
             pass_stations = current_leg["passStopList"]["stationList"]
             boarding_stop = pass_stations[0]["stationName"]
