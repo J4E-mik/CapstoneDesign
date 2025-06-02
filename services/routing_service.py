@@ -108,3 +108,6 @@ class RoutingService:
             return 3 # right
         else:
             return 2 #straight
+        
+    def store_subwway_steps(self, user_id:str, steps: dict):
+        user_session[user_id]={"step":steps}

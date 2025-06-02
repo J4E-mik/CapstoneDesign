@@ -4,7 +4,6 @@ from utils.gps_tracker import is_within_radius
 
 class GPSService:
     def update_user_location(self, user_id: str, lat: float, lon: float):
-        print(f"[DEBUG] Received GPS update from {user_id}: ({lat}, {lon})")
         user_locations[user_id] = (lon, lat)
         return GPSUpdateResponse(user=user_id, message="GPS updated")
     

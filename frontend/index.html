@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>경로 점수 시각화</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+</head>
+<body>
+    <h1>경로별 점수 시각화</h1>
+    <label for="user_id">User ID 입력: </label>
+    <input id="user_id" type="text" placeholder="user001">
+    <button id="loadBtn">경로 점수 불러오기</button>
+
+    <div id="error"></div>
+    <canvas id="routeScoreChart" width="800" height="400"></canvas>
+
+    <script src="main.js"></script>
+</body>
+</html>

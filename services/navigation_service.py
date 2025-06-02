@@ -52,7 +52,7 @@ class NavigationService:
             if leg['mode'] == 'BUS':
                 time = leg.get('sectionTime', 0)
                 dist = leg.get('distance', 0)
-                stops = len(leg.get('passStopList', {})).get('stationList',[])
+                stops = len(leg.get('passStopList', {}).get('stationList',[]))
                 score += time * 0.5 + dist * 0.2 + stops * 0.3
         return score
     
@@ -83,7 +83,26 @@ class NavigationService:
         scored.sort(key=lambda x: x[0])
         return scored[0][1]
     
-    def get_route(self, user_lon, user_lat, destination) -> RouteResponse:
+    def get_score_breakdown(self, itineraries):
+        result = []
+        for idx, it in enumerate(itineraries):
+            walk_score = self.get_walk_score(it["legs"])
+            bus_score = self.get_bus_score(it["legs"])
+            subway_score = self.get_subway_score(it["legs"])
+            total_score = self.get_total_score(it)
+            transfer_count = it.get('transferCount', 0)
+            result.append({
+                "index":idx,
+                "total_score": total_score,
+                "walk_score": walk_score,
+                "bus_score": bus_score,
+                "subway_score": subway_score,
+                "transfer_count": transfer_count
+            })
+            
+        return result
+
+    def get_route(self, user_id, user_lon, user_lat, destination) -> RouteResponse:
         '''
         실제 서비스 로직
         API요청 -> 경로 지수 계산 -> 최적경로 선택 -> 사용자 경로 전송
@@ -100,6 +119,13 @@ class NavigationService:
 
         itinerary = self.select_best_itinerary(itineraries)
 
+        user_session[user_id] = {
+            "itineraries": itineraries,
+            "itinerary": itinerary,
+            "current_leg_idx": 0,
+            "current_step_idx": 0
+        }
+
         return RouteResponse(
             destination = destination,
             start = {"lat":user_lat, "lon":user_lon},
@@ -107,15 +133,26 @@ class NavigationService:
             itinerary=itinerary
         )
     
-    def get_route_file(self, user_lon, user_lat, destination) -> RouteResponse:
+    def get_route_file(self, user_id, user_lon, user_lat, destination) -> RouteResponse:
+        '''
+        시연 영상을 위해 고정 된 경로를 선택 반환하는 함수
+        API응답을 json으로 저장해둔 파일에서 사전에 선정한 경로를 불러옴
+        '''
         with open("data/transit_response_road.json", "r", encoding='utf-8') as f:
             route_data = json.load(f)
 
-        itineraries = route_data.get("metadata", {}).get("plan", {}).get("itineraries", [])
+        itineraries = route_data.get("metaData", {}).get("plan", {}).get("itineraries", [])
         if not itineraries:
             return {"error": "경로 데이터 없음."}
         
         itinerary = itineraries[1]
+
+        user_session[user_id] = {
+            "itineraries": itineraries,
+            "itinerary": itinerary,
+            "current_leg_idx": 0,
+            "current_step_idx": 0
+        }
 
         return RouteResponse(
             destination = destination,
@@ -124,10 +161,3 @@ class NavigationService:
                    "lon":itinerary["legs"][-1]["end"]["lon"]},
             itinerary=itinerary
         )
-
-    def store_user_itinerary(self, user_id:str, itinerary: dict):
-        user_session[user_id]={
-            "itinerary": itinerary,
-            "current_leg_idx":0,
-            "current_step_idx":0
-        }

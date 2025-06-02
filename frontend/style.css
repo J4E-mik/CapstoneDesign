@@ -1,0 +1,21 @@
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 30px;
+    background: #f9fafc;
+}
+
+h1 {
+    color: #212a3e;
+}
+
+#routeScoreChart {
+    margin-top: 32px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px #0001;
+    padding: 16px;
+}
+#error {
+    color: red;
+    margin-top: 10px;
+}
