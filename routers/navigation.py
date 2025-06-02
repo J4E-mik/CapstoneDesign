@@ -13,6 +13,9 @@ async def get_route(
     destination: str = Query(...),
     service: NavigationService = Depends()
 ):
-    route_info = service.get_route(user_lon, user_lat, destination)
+    # 실제 서비스 로직
+    # route_info = service.get_route(user_lon, user_lat, destination)
+    # 시연 영상 촬영을 위한 고정 경로를 선택
+    route_info = service.get_route_file(user_lon, user_lat, destination)
     service.store_user_itinerary(user_id, route_info['itinerary'])
     return route_info
