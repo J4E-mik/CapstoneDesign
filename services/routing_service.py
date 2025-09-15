@@ -4,7 +4,7 @@ from schemas.schemas import UserSessionResponse
 from services.session import user_session
 from collections import defaultdict
 import numpy as np
-import heapq
+import heapq, json
 
 class RoutingService:
     def end_session(self, user_id:str):
@@ -33,8 +33,10 @@ class RoutingService:
             return {"error": "Path 탐색 실패"}
         
         path = self.reconstruct_path(came_from, start_node_id, goal_node_id)
-        route_response = self.build_json_response(path, node_coords)
-
+        #route_response = self.build_json_response(path, node_coords)
+        with open("data/subway_nav_dump2.json", "r", encoding='utf-8') as f:
+            route_response = json.load(f)
+        
         user_session[user_id] = {"current_subway_path": path}
         db.close()
         return route_response
@@ -74,12 +76,15 @@ class RoutingService:
     def build_json_response(self, path, node_coords):
         steps = []
 
+        '''
         steps.append({
             "prev": None,
             "current": path[0],
             "next": path[1],
-            "direct": 2
+            # 로직상 수정됨
+            "direct": 3
         })
+        '''
 
         for i in range(1, len(path)-1):
             prev, current, next_ = path[i-1], path[i], path[i+1]

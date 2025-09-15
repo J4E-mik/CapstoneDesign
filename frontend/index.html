@@ -13,7 +13,11 @@
     <label for="user_id">User ID 입력: </label>
     <input id="user_id" type="text" placeholder="user001">
     <button id="loadBtn">경로 점수 불러오기</button>
-
+    <div id="preferenceBtns">
+        <button data-pref="walk" class="prefBtn selected">도보 선호</button>
+        <button data-pref="bus" class="prefBtn">버스 선호</button>
+        <button data-pref="subway" class="prefBtn">지하철 선호</button>
+    </div>
     <div id="error"></div>
     <canvas id="routeScoreChart" width="800" height="400"></canvas>
 

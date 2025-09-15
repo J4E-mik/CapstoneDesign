@@ -38,15 +38,3 @@ async def subway_navigation(
     logger.info(f"지하철 경로 요청:\n\tuser_id:{user_id},\n\tstart_node:{start_node_id},\n\tgoal_node:{goal_node_id},\nsteps:\n{route_response}")
     logger.info(f"세션 정보: {user_service.user_information(user_id)}")
     return route_response
-
-
-'''
-@router.post("/start_session", response_model = UserSessionResponse)
-async def start_user_session(
-    user_id: str = Form(...),
-    itinerary: dict = Form(...),
-    routing_service: RoutingService = Depends()
-):
-    routing_service.store_user_itinerary(user_id, itinerary)
-    return UserSessionResponse(user_id=user_id, status="Itinerary 저장 완료.")
-'''

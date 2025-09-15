@@ -19,3 +19,17 @@ h1 {
     color: red;
     margin-top: 10px;
 }
+
+.prefBtn.selected {
+    background: #7ed957;
+    color: #fff;
+}
+.prefBtn {
+    margin: 0 6px;
+    padding: 6px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #e0e0e0;
+    cursor: pointer;
+    font-size: 1rem;
+}

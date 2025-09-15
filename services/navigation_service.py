@@ -36,7 +36,7 @@ class NavigationService:
             return response.json()
         return None
     
-    def get_walk_score(self, legs):
+    def get_walk_score(self, legs, walk_pref=1.0):
         score = 0
         for leg in legs:
             if leg['mode'] == 'WALK':
@@ -44,9 +44,10 @@ class NavigationService:
                 dist = leg.get('distance', 0)
                 steps = len(leg.get('steps', [])) if leg.get('steps') else 1
                 score += time *0.5 + dist *0.3 + steps * 0.2
+                score *=  walk_pref
         return score
     
-    def get_bus_score(self, legs):
+    def get_bus_score(self, legs, bus_pref=1.0):
         score = 0
         for leg in legs:
             if leg['mode'] == 'BUS':
@@ -54,9 +55,10 @@ class NavigationService:
                 dist = leg.get('distance', 0)
                 stops = len(leg.get('passStopList', {}).get('stationList',[]))
                 score += time * 0.5 + dist * 0.2 + stops * 0.3
+                score *= bus_pref
         return score
     
-    def get_subway_score(self, legs):
+    def get_subway_score(self, legs, subway_pref):
         score = 0
         for leg in legs:
             if leg['mode'] == 'SUBWAY':
@@ -64,16 +66,19 @@ class NavigationService:
                 dist = leg.get('distance', 0)
                 stops = len(leg.get('passStopList', {}).get('stationList',[]))
                 score += time * 0.4 + dist * 0.3 + stops * 0.3
+                score *= subway_pref
         return score
     
-    def get_total_score(self, itinerary):
+    def get_total_score(self, itinerary, user_pref=None):
+        if user_pref is None:
+            user_pref = {"walk": 1.0, "bus": 1.0, "subway": 1.0}
         total_time = itinerary.get('totalTime', 0)
         transfer_count = itinerary.get('transferCount', 0)
         legs = itinerary.get('legs', [])
 
-        walk_score = self.get_walk_score(legs)
-        bus_score = self.get_bus_score(legs)
-        subway_score = self.get_subway_score(legs)
+        walk_score = self.get_walk_score(legs,user_pref["walk"])
+        bus_score = self.get_bus_score(legs,user_pref["bus"])
+        subway_score = self.get_subway_score(legs,user_pref["subway"])
 
         score = total_time * 0.3 + transfer_count * 10 + walk_score + bus_score + subway_score
         return score
@@ -83,13 +88,24 @@ class NavigationService:
         scored.sort(key=lambda x: x[0])
         return scored[0][1]
     
-    def get_score_breakdown(self, itineraries):
+    def get_score_breakdown(self, itineraries, preference):
+        if not preference or preference == "all":
+            walk_pref = bus_pref = subway_pref = 1.0
+        else:
+            walk_pref = 1.0 if preference == "walk" else 2.0
+            bus_pref = 1.0 if preference == "bus" else 2.0
+            subway_pref = 1.0 if preference == "subway" else 2.0
+
         result = []
         for idx, it in enumerate(itineraries):
-            walk_score = self.get_walk_score(it["legs"])
-            bus_score = self.get_bus_score(it["legs"])
-            subway_score = self.get_subway_score(it["legs"])
-            total_score = self.get_total_score(it)
+            walk_score = self.get_walk_score(it["legs"], walk_pref)
+            bus_score = self.get_bus_score(it["legs"], bus_pref)
+            subway_score = self.get_subway_score(it["legs"], subway_pref)
+            total_score = (
+                it.get('totalTime', 0) * 0.3
+                + it.get('transferCount', 0) * 10
+                + walk_score + bus_score + subway_score
+            )
             transfer_count = it.get('transferCount', 0)
             result.append({
                 "index":idx,
@@ -137,8 +153,9 @@ class NavigationService:
         '''
         시연 영상을 위해 고정 된 경로를 선택 반환하는 함수
         API응답을 json으로 저장해둔 파일에서 사전에 선정한 경로를 불러옴
+        transit_response.json
         '''
-        with open("data/transit_response_road.json", "r", encoding='utf-8') as f:
+        with open("data/transit_response.json", "r", encoding='utf-8') as f:
             route_data = json.load(f)
 
         itineraries = route_data.get("metaData", {}).get("plan", {}).get("itineraries", [])

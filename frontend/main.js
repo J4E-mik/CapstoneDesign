@@ -1,3 +1,14 @@
+document.querySelectorAll('.prefBtn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.prefBtn').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
+        currentPreference = this.dataset.pref;
+        // 버튼 클릭 시 바로 차트 갱신 (userId 입력 후에만)
+        const userId = document.getElementById("user_id").value.trim();
+        if (userId) fetchAndDraw(userId, currentPreference);
+    });
+});
+
 document.getElementById("loadBtn").addEventListener("click", () => {
     const userId = document.getElementById("user_id").value.trim();
     if (!userId) {
@@ -5,19 +16,18 @@ document.getElementById("loadBtn").addEventListener("click", () => {
         return;
     }
     document.getElementById("error").innerText = "";
-    fetchAndDraw(userId);
+    fetchAndDraw(userId, currentPreference);
 });
 
 let chart;
 
-function fetchAndDraw(userId) {
-    fetch(`/nav/scores?user_id=${encodeURIComponent(userId)}`)
+function fetchAndDraw(userId, preference) {
+    fetch(`/nav/scores?user_id=${encodeURIComponent(userId)}&preference=${preference}`)
         .then(res => {
             if (!res.ok) throw new Error("API 에러");
             return res.json();
         })
         .then(data => {
-            console.log('API 데이터:', data); // 데이터 콘솔 출력 (디버깅용)
             drawChart(data);
         })
         .catch(err => {

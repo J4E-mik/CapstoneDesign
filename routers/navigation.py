@@ -31,11 +31,11 @@ async def get_route(
     return route_info
 
 @router.get("/scores")
-async def get_route_scores(user_id: str = Query(...)):
+async def get_route_scores(user_id: str = Query(...), preference: str = Query("all")):
     session = user_session.get(user_id)
     if not session or "itineraries" not in session:
         return JSONResponse(content={"error":"No route data for this user."}, status_code=404)
     
     itineraries = session["itineraries"]
-    score_list = service.get_score_breakdown(itineraries)
+    score_list = service.get_score_breakdown(itineraries, preference)
     return JSONResponse(content=score_list)
