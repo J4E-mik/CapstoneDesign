@@ -1,9 +1,11 @@
+let chart;
+let currentPreference = null;
+
 document.querySelectorAll('.prefBtn').forEach(btn => {
     btn.addEventListener('click', function () {
         document.querySelectorAll('.prefBtn').forEach(b => b.classList.remove('selected'));
         this.classList.add('selected');
         currentPreference = this.dataset.pref;
-        // 버튼 클릭 시 바로 차트 갱신 (userId 입력 후에만)
         const userId = document.getElementById("user_id").value.trim();
         if (userId) fetchAndDraw(userId, currentPreference);
     });
@@ -19,10 +21,15 @@ document.getElementById("loadBtn").addEventListener("click", () => {
     fetchAndDraw(userId, currentPreference);
 });
 
-let chart;
-
 function fetchAndDraw(userId, preference) {
-    fetch(`/nav/scores?user_id=${encodeURIComponent(userId)}&preference=${preference}`)
+    // preference가 null이면, 쿼리에서 아예 파라미터를 빼거나 'all'로 넘김
+    let url = `/nav/scores?user_id=${encodeURIComponent(userId)}`;
+    if (preference) {
+        url += `&preference=${preference}`;
+    } else {
+        url += `&preference=all`; // 백엔드에서 all은 모두 1.0로 처리
+    }
+    fetch(url)
         .then(res => {
             if (!res.ok) throw new Error("API 에러");
             return res.json();
@@ -35,6 +42,7 @@ function fetchAndDraw(userId, preference) {
             if (chart) chart.destroy();
         });
 }
+
 
 function drawChart(data) {
     const ctx = document.getElementById("routeScoreChart").getContext("2d");
